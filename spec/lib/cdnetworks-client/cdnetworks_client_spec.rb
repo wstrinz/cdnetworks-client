@@ -245,6 +245,12 @@ describe CdnetworksClient do
     end
 
     context "getting a list of PADs" do
+      before do
+        stub_request(:post, "#{@url}/purge/rest/padList").
+          with(:body => {"pass"=>"secret", "user"=>"user@user.com"}).
+          to_return(:status => 200, :body => "", :headers => {})
+      end
+
       it "calls the list method" do
         @cdn_api.pad_list
 
@@ -259,6 +265,11 @@ describe CdnetworksClient do
     end
 
     context "get the status of a purge" do
+      before do
+        stub_request(:post, "https://openapi.us.cdnetworks.com/purge/rest/status").
+          to_return(status: 200, body: "", headers: {})
+      end
+
       it "calls the status method" do
         @cdn_api.status
 
