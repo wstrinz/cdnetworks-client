@@ -1,4 +1,7 @@
 module StatisticsOpenApi
+  include AuthSession
+  include OpenApiKeys
+
   BANDWIDTH_PATH = "api/rest/traffic/edge"
 
   class StatsHelper
@@ -15,32 +18,21 @@ module StatisticsOpenApi
     end
   end
 
-  def bandwidth_usage
+  def bandwidth_usage(from, to, time_interval = 2)
+    session = get_session(@user, @password)
+    api_key = get_api_key(session.first)
+
     opts = {
-      sessionToken: "",
-      apiKey: "",
-      fromDate: "",
-      toDate: "",
-      timeInterval: "",
+      sessionToken: session.first, # == sessionToken. Should make this a has in auth module
+      apiKey: api_key,
+      fromDate: from,
+      toDate: to,
+      timeInterval: time_interval,
       output: "json"
     }
 
     response = call(BANDWIDTH_PATH, opts)
 
     StatsHelper.handle_response(response)
-
-    # response = @@bandwidth_use.lookup(
-    #   site_id,
-    #   @@sp.username,
-    #   @@sp.plaintext_password,
-    #   "1", # CL - Using 1 gives us stuff we want. using 2 gives us something else. What either means is beyond me.
-    #   start_time.strftime("%Y-%m-%d %H:%M:%S"),
-    #   end_time.strftime("%Y-%m-%d %H:%M:%S")# CL - These dates have to be in this exact format
-    # )
-
-    # # CL - If there is an error code, find out what it means
-    # raise error_to_string(response) if response.to_f < 0
-
-    # return response.to_f
   end
 end
