@@ -1,5 +1,5 @@
 module AuthOpenApi
-  BASE_URL = "https://openapi.cdnetworks.com"
+  BASE_URL = "https://openapi.us.cdnetworks.com"
   LOGIN_URL = "#{BASE_URL}/api/rest/login"
   LOGOUT_URL = "#{BASE_URL}/api/rest/logout"
 
@@ -23,10 +23,7 @@ module AuthOpenApi
         pass: @pass,
         output: "json"
       }
-      request = Net::HTTP::Post.new(LOGIN_URL)
-      request.set_form_data(params)
-
-      response = http.request(request)
+      response = Net::HTTP.post_form(URI(LOGIN_URL), params)
 
       if error = OpenApiError::ERROR_CODES[response.code]
         raise_handled_error(response.code, error)

@@ -1,12 +1,19 @@
+require "json"
+
 require "cdnetworks-client/version"
 require "cdnetworks-client/cache_purge_api"
 require "cdnetworks-client/config_open_api"
 require "cdnetworks-client/cache_flush_open_api"
+require "cdnetworks-client/open_api_error"
+require "cdnetworks-client/auth_open_api"
+require "cdnetworks-client/open_api_keys"
+require "cdnetworks-client/statistics_open_api"
 
 class CdnetworksClient
   include ConfigOpenApi
   include CachePurgeApi
   include CacheFlushOpenApi
+  include StatisticsOpenApi
 
 
   def initialize(credentials={})

@@ -355,4 +355,36 @@ describe CdnetworksClient do
     end
   end
 
+  context StatisticsOpenApi do
+    describe "#bandwidth_usage" do
+      let(:end_time)           { Time.now }
+      let(:start_time)         { end_time - 1*60*60*24 }
+      let(:expected_bandwidth) { 1.23456 }
+
+      before do
+        # TODO: extract stubs to a helper
+        fake_token = "12345sessiontoken"
+        fake_api_key = "anapikey56789"
+        stub_request(:post, "#{@url}/api/rest/login").
+          to_return body: JSON.pretty_unparse(loginResponse: {resultCode: 0,
+                                                             session: [fake_token, "svcGroup", "svcGroupIdentifier"]})
+
+        stub_request(:get, "#{@url}/api/rest/getApiKeyList?output=json&session_token=#{fake_token}").
+          to_return body: JSON.pretty_unparse(apiKeyListResponse: {apiKeyInformation:
+                                                                    [1, 'serviceName', fake_api_key, 'parentKey'],
+                                                                   resultCode: 0})
+        stub_request(:post, "https://openapi.us.cdnetworks.com/rest/traffic/edge").
+          to_return body: JSON.pretty_unparse(edgeTrafficResponse: {returnCode: 0,
+                                                                    trafficItem:
+                                                                      ['200809162305', expected_bandwidth, 10.10]})
+
+
+      end
+
+      it "returns bandwidth usage for a given time period" do
+        expect(@cdn_api.bandwidth_usage start_time, end_time).to eq expected_bandwidth
+      end
+    end
+  end
+
 end

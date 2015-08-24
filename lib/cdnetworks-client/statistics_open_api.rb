@@ -1,19 +1,26 @@
 module StatisticsOpenApi
-  include AuthSession
+  include AuthOpenApi
   include OpenApiKeys
 
   BANDWIDTH_PATH = "api/rest/traffic/edge"
 
   class StatsHelper
+    def self.handle_error_response(code, body)
+      raise "Error #{resp[:code]}: #{desc}"
+    end
+
     def self.handle_response(resp)
       if resp[:code] == "200"
-        JSON.parse(resp[:body])['bandwidth']
-      else
-        if desc = OpenApiError::ERROR_CODES[resp[:code]]
-          raise "Error #{resp[:code]}: #{desc}"
-        else
-          raise "Unexpected response #{resp[:code]}"
+        parsed = JSON.parse(resp[:body])
+        return_code = parsed['edgeTrafficResponse']['returnCode'].to_s
+
+        unless %w{0 200}.include? return_code
+          OpenApiError::ErrorHandler.handle_error_response(return_code, resp[:body])
         end
+
+        parsed['edgeTrafficResponse']['trafficItem'][1]
+      else
+        OpenApiError::ErrorHandler.handle_error_response(resp[:code], resp[:body])
       end
     end
   end
