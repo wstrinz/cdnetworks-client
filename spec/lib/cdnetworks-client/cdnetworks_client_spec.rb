@@ -10,6 +10,8 @@ describe CdnetworksClient do
                          )
 
     @url               = "https://openapi.us.cdnetworks.com"
+
+    @session_token, @api_key = stub_auth_calls
   end
 
   context "retrieving pad list" do
@@ -22,7 +24,7 @@ describe CdnetworksClient do
       @cdn_api.list
 
       expect(a_request(:post, "#{@url}/config/rest/pan/site/list").
-        with(:body    => 'user=user%40user.com&pass=secret',
+        with(:body    => { "apiKey"=> @api_key, "sessionToken" => @session_token },
              :headers => {
                            'Accept'      =>'*/*',
                            'Content-Type'=>'application/x-www-form-urlencoded',
@@ -34,7 +36,7 @@ describe CdnetworksClient do
       @cdn_api.list(:prod => true)
 
       expect(a_request(:post, "#{@url}/config/rest/pan/site/list").
-        with(:body    => 'prod=true&user=user%40user.com&pass=secret',
+        with(:body    => {"prod" => "true", "apiKey"=> @api_key, "sessionToken" => @session_token },
              :headers => {
                            'Accept'      =>'*/*',
                            'Content-Type'=>'application/x-www-form-urlencoded',
@@ -53,7 +55,7 @@ describe CdnetworksClient do
       @cdn_api.view
 
       expect(a_request(:post, "#{@url}/config/rest/pan/site/view").
-        with(:body    => 'user=user%40user.com&pass=secret',
+        with(:body    => { "apiKey"=> @api_key, "sessionToken" => @session_token },
              :headers => {
                            'Accept'      =>'*/*',
                            'Content-Type'=>'application/x-www-form-urlencoded',
@@ -65,7 +67,7 @@ describe CdnetworksClient do
       @cdn_api.view(:pad => "cache.foo.com")
 
       expect(a_request(:post, "#{@url}/config/rest/pan/site/view").
-        with(:body    => 'pad=cache.foo.com&user=user%40user.com&pass=secret',
+        with(:body    => { "pad" => "cache.foo.com", "apiKey"=> @api_key, "sessionToken" => @session_token },
              :headers => {
                            'Accept'      =>'*/*',
                            'Content-Type'=>'application/x-www-form-urlencoded',
@@ -85,7 +87,7 @@ describe CdnetworksClient do
       @cdn_api.add
 
       expect(a_request(:post, "#{@url}/config/rest/pan/site/add").
-      with(:body    => 'user=user%40user.com&pass=secret',
+      with(:body    => { "apiKey"=> @api_key, "sessionToken" => @session_token },
            :headers => {
                          'Accept'      =>'*/*',
                          'Content-Type'=>'application/x-www-form-urlencoded',
@@ -97,7 +99,7 @@ describe CdnetworksClient do
       @cdn_api.add(:pad => "cache.foo.com", :origin => "neworigin.foo.com")
 
       expect(a_request(:post, "#{@url}/config/rest/pan/site/add").
-        with(:body    => 'pad=cache.foo.com&origin=neworigin.foo.com&user=user%40user.com&pass=secret',
+        with(:body    => { "apiKey"=> @api_key, "sessionToken" => @session_token, "pad" => "cache.foo.com", "origin" => "neworigin.foo.com" },
              :headers => {
                            'Accept'      =>'*/*',
                            'Content-Type'=>'application/x-www-form-urlencoded',
@@ -116,7 +118,7 @@ describe CdnetworksClient do
       @cdn_api.edit
 
       expect(a_request(:post, "#{@url}/config/rest/pan/site/edit").
-      with(:body    => 'user=user%40user.com&pass=secret',
+      with(:body    => { "apiKey"=> @api_key, "sessionToken" => @session_token },
            :headers => {
                          'Accept'      =>'*/*',
                          'Content-Type'=>'application/x-www-form-urlencoded',
@@ -128,7 +130,7 @@ describe CdnetworksClient do
       @cdn_api.edit(:pad => "cache.foo.com", :honor_byte_range => "1")
 
       expect(a_request(:post, "#{@url}/config/rest/pan/site/edit").
-      with(:body    => 'pad=cache.foo.com&honor_byte_range=1&user=user%40user.com&pass=secret',
+      with(:body    => { "pad" => "cache.foo.com", "honor_byte_range" => "1", "apiKey"=> @api_key, "sessionToken" => @session_token },
            :headers => {
                          'Accept'      =>'*/*',
                          'Content-Type'=>'application/x-www-form-urlencoded',
@@ -339,7 +341,7 @@ describe CdnetworksClient do
   context "error handling" do
     before(:each) do
       stub_request(:post, "#{@url}/config/rest/pan/site/list").
-        with(:body    => {"pass"=>@password, "user"=>"#{@user}"},
+        with(:body    => { "apiKey"=> @api_key, "sessionToken" => @session_token },
              :headers => {
                            'Accept'      =>'*/*',
                            'Content-Type'=>'application/x-www-form-urlencoded',

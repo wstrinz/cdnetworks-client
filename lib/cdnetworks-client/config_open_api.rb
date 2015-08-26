@@ -21,8 +21,11 @@ module ConfigOpenApi
   end
 
   def add_config_credentials(options)
-    options[:user]     = @user
-    options[:pass] = @password
+    # options[:user]     = @user
+    # options[:pass] = @password
+    session = get_session(@user, @password)
+    options[:sessionToken] = session.first
+    options[:apiKey] = get_api_key(session.first)
 
     options
   end
