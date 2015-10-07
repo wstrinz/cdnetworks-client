@@ -44,7 +44,7 @@ module ApiStubs
     # TODO - take date as input and strftime it in output
     resp = JSON.pretty_unparse(trafficResponse: {returnCode: 0,
                                                  trafficItem:
-                                                 ['200809162305', expected_bandwidth, 10.10]})
+                                                 [{dateTime: '200809162305', bandwidth: expected_bandwidth, dataTransferred: 10.10}]})
     stub_request(:post, "https://openapi.us.cdnetworks.com/rest/traffic/edge").to_return(body: resp)
   end
 end

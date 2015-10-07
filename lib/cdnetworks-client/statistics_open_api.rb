@@ -12,13 +12,13 @@ module StatisticsOpenApi
     def self.handle_response(resp)
       if resp[:code] == "200"
         parsed = JSON.parse(resp[:body])
-        return_code = parsed['edgeTrafficResponse']['returnCode'].to_s
+        return_code = parsed['trafficResponse']['returnCode'].to_s
 
         unless %w{0 200}.include? return_code
           OpenApiError::ErrorHandler.handle_error_response(return_code, resp[:body])
         end
 
-        parsed['edgeTrafficResponse']['trafficItem'][1]
+        parsed['trafficResponse']['trafficItem'][0]['bandwidth']
       else
         OpenApiError::ErrorHandler.handle_error_response(resp[:code], resp[:body])
       end
@@ -27,7 +27,7 @@ module StatisticsOpenApi
 
   def bandwidth_usage(from, to, time_interval = 2)
     session = get_session(@user, @password)
-    api_key = get_api_key(session.first)
+    api_key = get_api_key(session.first["sessionToken"])
 
     opts = {
       sessionToken: session.first, # == sessionToken. Should make this a has in auth module
