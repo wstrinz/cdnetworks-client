@@ -357,12 +357,18 @@ describe CdnetworksClient do
 
 
   describe AuthOpenApi do
-    before { @fake_token, _ = stub_auth_calls }
+    before { @fake_token, _, @fake_identifier = stub_auth_calls }
 
     it "gets a session token" do
       session = @cdn_api.get_session(@user, @password)
 
-      expect(session[0]).to eq(@fake_token)
+      expect(session[0]["sessionToken"]).to eq(@fake_token)
+    end
+
+    it "gets a service identifier" do
+      session = @cdn_api.get_session(@user, @password)
+
+      expect(session[0]["svcGroupIdentifier"]).to eq(@fake_identifier)
     end
   end
 
@@ -370,7 +376,7 @@ describe CdnetworksClient do
     before { @fake_token, @fake_key = stub_auth_calls }
 
     it "gets api keys" do
-      api_key = @cdn_api.get_api_key(@fake_token)
+      api_key = @cdn_api.get_api_key(@fake_token)[1]["apiKey"]
 
       expect(api_key).to eq(@fake_key)
     end

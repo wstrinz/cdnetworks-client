@@ -14,13 +14,13 @@ module OpenApiKeys
       if response.code == "200"
         body = response.read_body
         parsed = JSON.parse(body)
-        return_code = parsed['apiKeyListResponse']['resultCode']
+        return_code = parsed['apiKeyInfo']['returnCode']
 
         unless %w{0 200}.include? return_code.to_s
           OpenApiError::ErrorHandler.handle_error_response(return_code, body)
         end
 
-        return parsed['apiKeyListResponse']['apiKeyInformation'][2]
+        return parsed['apiKeyInfo']['apiKeyInfoItem']
       else
         OpenApiError::ErrorHandler.handle_error_response(response.code, body)
       end
