@@ -1,14 +1,14 @@
 module AuthOpenApi
-  BASE_URL = "https://openapi-beta.cdnetworks.com"
-  LOGIN_URL = "#{BASE_URL}/api/rest/login"
-  LOGOUT_URL = "#{BASE_URL}/api/rest/logout"
+  LOGIN_URL = "/api/rest/login"
+  LOGOUT_URL = "/api/rest/logout"
 
   class AuthSession
     def raise_handled_error(code, desc)
       raise "Auth error: #{code} - #{desc}"
     end
 
-    def initialize(user, pass)
+    def initialize(user, pass, base_url)
+      @base_url = base_url
       @user = user
       @pass = pass
     end
@@ -23,7 +23,7 @@ module AuthOpenApi
         pass: @pass,
         output: "json"
       }
-      response = Net::HTTP.post_form(URI(LOGIN_URL), params)
+      response = Net::HTTP.post_form(URI("#{@base_url}#{LOGIN_URL}"), params)
 
       if error = OpenApiError::ERROR_CODES[response.code]
         raise_handled_error(response.code, error)
@@ -47,7 +47,7 @@ module AuthOpenApi
         pass: @pass,
         output: "json"
       }
-      request = Net::HTTP::Post.new(LOGIN_URL)
+      request = Net::HTTP::Post.new("#{@base_url}#{LOGIN_URL}")
       request.set_form_data(params)
 
       response = http.request(request)
@@ -74,6 +74,6 @@ module AuthOpenApi
   end
 
   def get_session
-    @auth_session ||= AuthSession.new(@user, @password).session
+    @auth_session ||= AuthSession.new(@user, @password, base_url(@location)).session
   end
 end

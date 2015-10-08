@@ -38,7 +38,7 @@ module ApiStubs
                                                                  apiKey: "55555555555555555555555555555555",
                                                                  parentApiKey: "SERVICECATEGORY_CA"}]}})
 
-    stub_request(:get, "#{@url}/api/rest/getApiKeyList?output=json&sessionToken=#{session_token}").to_return(body: resp)
+    stub_request(:post, "#{@url}/api/rest/getApiKeyList").with(body: {"output"=>"json", "sessionToken"=>session_token}).to_return(body: resp)
   end
 
   def stub_get_edge_traffic(expected_bandwidth)
