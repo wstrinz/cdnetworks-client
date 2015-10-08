@@ -25,12 +25,13 @@ module StatisticsOpenApi
     end
   end
 
-  def bandwidth_usage(from, to, time_interval = 2)
-    session = get_session(@user, @password)
-    api_key = get_api_key(session.first["sessionToken"])
+  def bandwidth_usage(service_name, from, to, time_interval = 2)
+    session = get_session
+
+    api_key = get_api_key(session.first["sessionToken"], service_name)
 
     opts = {
-      sessionToken: session.first, # == sessionToken. Should make this a has in auth module
+      sessionToken: session.first['sessionToken'],
       apiKey: api_key,
       fromDate: from,
       toDate: to,

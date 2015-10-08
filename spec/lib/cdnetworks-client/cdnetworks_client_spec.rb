@@ -183,7 +183,7 @@ describe CdnetworksClient do
 
     context "getting a cache domain list" do
       before(:each) do
-        stub_request(:post, "https://openapi.us.cdnetworks.com/OpenAPI/services/CachePurgeAPI/getCacheDomainList").
+        stub_request(:post, "#{@url}/OpenAPI/services/CachePurgeAPI/getCacheDomainList").
           to_return(:status => 200, :body => "", :headers => {})
       end
 
@@ -266,7 +266,7 @@ describe CdnetworksClient do
 
     context "get the status of a purge" do
       before do
-        stub_request(:post, "https://openapi.us.cdnetworks.com/purge/rest/status").
+        stub_request(:post, "#{@url}/purge/rest/status").
           to_return(status: 200, body: "", headers: {})
       end
 
@@ -356,47 +356,59 @@ describe CdnetworksClient do
   end
 
 
-  describe AuthOpenApi do
-    before { @fake_token, _, @fake_identifier = stub_auth_calls }
+  context 'OpenApiV2' do
+    before do
+      @cdn_api           = CdnetworksClient.new(
+                             user: @user,
+                             pass: @password,
+                             location: "Beta"
+                           )
 
-    it "gets a session token" do
-      session = @cdn_api.get_session(@user, @password)
-
-      expect(session[0]["sessionToken"]).to eq(@fake_token)
+      @url               = "https://openapi-beta.cdnetworks.com"
     end
 
-    it "gets a service identifier" do
-      session = @cdn_api.get_session(@user, @password)
+    describe AuthOpenApi do
+      before { @fake_token, _, @fake_identifier = stub_auth_calls }
 
-      expect(session[0]["svcGroupIdentifier"]).to eq(@fake_identifier)
-    end
-  end
+      it "gets a session token" do
+        session = @cdn_api.get_session
 
-  describe OpenApiKeys do
-    before { @fake_token, @fake_key = stub_auth_calls }
-
-    it "gets api keys" do
-      api_key = @cdn_api.get_api_key(@fake_token)[1]["apiKey"]
-
-      expect(api_key).to eq(@fake_key)
-    end
-  end
-
-  describe StatisticsOpenApi do
-    describe "#bandwidth_usage" do
-      let(:end_time)           { Time.now }
-      let(:start_time)         { end_time - 1*60*60*24 }
-      let(:expected_bandwidth) { 1.23456 }
-
-      before do
-        stub_auth_calls
-        stub_get_edge_traffic(expected_bandwidth)
+        expect(session[0]["sessionToken"]).to eq(@fake_token)
       end
 
-      it "returns bandwidth usage for a given time period" do
-        expect(@cdn_api.bandwidth_usage start_time, end_time).to eq expected_bandwidth
+      it "gets a service identifier" do
+        session = @cdn_api.get_session
+
+        expect(session[0]["svcGroupIdentifier"]).to eq(@fake_identifier)
       end
     end
-  end
 
+    describe OpenApiKeys do
+      before { @fake_token, @fake_key, _, @fake_service = stub_auth_calls }
+
+      it "gets api keys" do
+        api_key = @cdn_api.get_api_key(@fake_token, @fake_service)
+
+        expect(api_key).to eq(@fake_key)
+      end
+    end
+
+    describe StatisticsOpenApi do
+      describe "#bandwidth_usage" do
+        let(:end_time)           { Time.now }
+        let(:start_time)         { end_time - 1*60*60*24 }
+        let(:expected_bandwidth) { 1.23456 }
+
+        before do
+          _, _, _, @fake_service = stub_auth_calls
+          stub_get_edge_traffic(expected_bandwidth)
+        end
+
+        it "returns bandwidth usage for a given time period" do
+          expect(@cdn_api.bandwidth_usage @fake_service, start_time, end_time).to eq expected_bandwidth
+        end
+      end
+    end
+
+  end
 end

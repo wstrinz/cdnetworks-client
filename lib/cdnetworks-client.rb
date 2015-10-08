@@ -47,13 +47,15 @@ class CdnetworksClient
       "https://openapi.jp.cdnetworks.com"
     when location == "China"
       "https://openapi.txnetworks.cn"
+    when location == "Beta"
+      "https://openapi-beta.cdnetworks.com"
     else
       "https://openapi.us.cdnetworks.com"
     end
   end
 
   def http
-    uri = URI.parse(base_url)
+    uri = URI.parse(base_url(@location))
 
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true

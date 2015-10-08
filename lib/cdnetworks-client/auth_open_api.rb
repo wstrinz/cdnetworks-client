@@ -1,5 +1,5 @@
 module AuthOpenApi
-  BASE_URL = "https://openapi.us.cdnetworks.com"
+  BASE_URL = "https://openapi-beta.cdnetworks.com"
   LOGIN_URL = "#{BASE_URL}/api/rest/login"
   LOGOUT_URL = "#{BASE_URL}/api/rest/logout"
 
@@ -73,7 +73,7 @@ module AuthOpenApi
     end
   end
 
-  def get_session(user, pass)
-    @auth_session ||= AuthSession.new(user, pass).session
+  def get_session
+    @auth_session ||= AuthSession.new(@user, @password).session
   end
 end

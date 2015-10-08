@@ -1,10 +1,10 @@
 module OpenApiKeys
-  BASE_URL = "https://openapi.us.cdnetworks.com"
+  BASE_URL = "https://openapi-beta.cdnetworks.com"
   GET_KEY_URL = "#{BASE_URL}/api/rest/getApiKeyList"
 
-  def get_api_key(session_token)
+  def get_api_key(session_token, service_name)
     params = {
-      session_token: session_token,
+      sessionToken: session_token,
       output: "json"
     }
     uri = URI(GET_KEY_URL)
@@ -20,7 +20,15 @@ module OpenApiKeys
           OpenApiError::ErrorHandler.handle_error_response(return_code, body)
         end
 
-        return parsed['apiKeyInfo']['apiKeyInfoItem']
+        key_for_service = (parsed['apiKeyInfo']['apiKeyInfoItem'] || []).find do |service|
+          service['serviceName'] == service_name
+        end
+
+        unless key_for_service
+          raise "No key found for #{service_name}"
+        end
+
+        return key_for_service['apiKey']
       else
         OpenApiError::ErrorHandler.handle_error_response(response.code, body)
       end
