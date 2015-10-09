@@ -73,7 +73,11 @@ module AuthOpenApi
     end
   end
 
-  def get_session
-    @auth_session ||= AuthSession.new(@user, @password, base_url(@location)).session
+  def get_session(reset = false)
+    if !@auth_session || reset
+      @auth_session = AuthSession.new(@user, @password, base_url(@location))
+    end
+
+    @auth_session.session
   end
 end

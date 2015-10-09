@@ -31,6 +31,12 @@ class CdnetworksClient
   def call(path,options)
     begin
       response = http.request(compose_request(path,options))
+
+      if expired_session_response?(response)
+        new_session = get_session(true)
+        options[:sessionToken] = new_session.first["sessionToken"]
+        return call(path, options)
+      end
       response_hash = { code: response.code, body: response.body }
     rescue StandardError=>e
       "An error has occurred connecting to the CDNetworks API (#{e})"
@@ -61,5 +67,22 @@ class CdnetworksClient
     http.use_ssl = true
 
     http
+  end
+
+  def expired_session_response?(response)
+    if response.code.to_s == "200"
+      begin
+        parsed = JSON.parse(response.body)
+        if parsed.values.first
+          parsed.values.first['returnCode'] == 102
+        else
+          false
+        end
+      rescue JSON::ParserError
+        false
+      end
+    else
+      false
+    end
   end
 end

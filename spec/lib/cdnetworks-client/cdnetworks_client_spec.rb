@@ -367,6 +367,23 @@ describe CdnetworksClient do
       @url               = "https://openapi-beta.cdnetworks.com"
     end
 
+    context "Session Management" do
+      let(:bad_token) { "oldtoken12345" }
+      let(:expired_session_resp) { JSON.pretty_unparse(apiKeyInfo: {returnCode: 102}) }
+
+      before do
+        @good_token, _ = stub_auth_calls
+        stub_request(:post, "#{@url}/api/rest/getApiKeyList").with(body: {"output"=>"json", "sessionToken"=>bad_token}).to_return(body: expired_session_resp)
+      end
+
+      it "re-establishes session if it expires" do
+        session_keys = @cdn_api.get_api_key_list(bad_token)
+
+        expect(a_request(:post, "#{@url}/api/rest/login")).to have_been_made
+        expect(session_keys.length).to be > 0
+      end
+    end
+
     describe AuthOpenApi do
       before { @fake_token, _, @fake_identifier = stub_auth_calls }
 
