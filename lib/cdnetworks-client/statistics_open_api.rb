@@ -21,7 +21,11 @@ module StatisticsOpenApi
         if return_code == "404"
           nil
         else
-          parsed['trafficResponse']['trafficItem'][0]['bandwidth']
+          if parsed['trafficResponse']['trafficItem'].is_a? Hash
+            parsed['trafficResponse']['trafficItem']['dataTransferred']
+          else
+            parsed['trafficResponse']['trafficItem'].map{|i| i['dataTransferred']}.inject(&:+)
+          end
         end
 
       else
