@@ -2,7 +2,7 @@ module StatisticsOpenApi
   include AuthOpenApi
   include OpenApiKeys
 
-  BANDWIDTH_PATH = "api/rest/traffic/edge"
+  BANDWIDTH_PATH = "/api/rest/traffic/edge"
 
   class StatsHelper
     def self.handle_error_response(code, body)
@@ -14,11 +14,16 @@ module StatisticsOpenApi
         parsed = JSON.parse(resp[:body])
         return_code = parsed['trafficResponse']['returnCode'].to_s
 
-        unless %w{0 200}.include? return_code
+        unless %w{0 200 404}.include? return_code
           OpenApiError::ErrorHandler.handle_error_response(return_code, resp[:body])
         end
 
-        parsed['trafficResponse']['trafficItem'][0]['bandwidth']
+        if return_code == "404"
+          nil
+        else
+          parsed['trafficResponse']['trafficItem'][0]['bandwidth']
+        end
+
       else
         OpenApiError::ErrorHandler.handle_error_response(resp[:code], resp[:body])
       end
@@ -33,8 +38,8 @@ module StatisticsOpenApi
     opts = {
       sessionToken: session.first['sessionToken'],
       apiKey: api_key,
-      fromDate: from,
-      toDate: to,
+      fromDate: from.strftime("%Y%m%d"),
+      toDate: to.strftime("%Y%m%d"),
       timeInterval: time_interval,
       output: "json"
     }
