@@ -382,6 +382,19 @@ describe CdnetworksClient do
         expect(a_request(:post, "#{@url}/api/rest/login")).to have_been_made
         expect(session_keys.length).to be > 0
       end
+
+      it "doesn't infinite loop if session can't be re-established" do
+        stub_request(:post, "#{@url}/api/rest/login").to_return(body: JSON.pretty_unparse(loginResponse: {returnCode: 101}))
+        expect { @cdn_api.get_api_key_list(bad_token) }.to raise_error(OpenApiError::ApiError)
+      end
+
+      it "gives up if session is not re-established after MAX_SESSION_RETRIES tries" do
+        stub_request(:post, "#{@url}/api/rest/getApiKeyList").with(body: {"output"=>"json", "sessionToken"=>@good_token}).to_return(body: expired_session_resp)
+
+        expect { @cdn_api.get_api_key_list(bad_token) }.to raise_error(OpenApiError::CriticalApiError)
+
+        expect(a_request(:post, "#{@url}/api/rest/login")).to have_been_made.times(3)
+      end
     end
 
     describe AuthOpenApi do

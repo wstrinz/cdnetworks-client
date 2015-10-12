@@ -15,6 +15,7 @@ class CdnetworksClient
   include CacheFlushOpenApi
   include StatisticsOpenApi
 
+  MAX_SESSION_RETRIES = 2
 
   def initialize(credentials={})
     @user       = credentials[:user]
@@ -28,18 +29,30 @@ class CdnetworksClient
     request
   end
 
-  def call(path,options)
+  def call(path,options,session_retries=0)
     begin
       response = http.request(compose_request(path,options))
 
       if expired_session_response?(response)
-        new_session = get_session(true)
-        options[:sessionToken] = new_session.first["sessionToken"]
-        return call(path, options)
+        if session_retries <= MAX_SESSION_RETRIES
+          new_session = get_session(true)
+          options[:sessionToken] = new_session.first["sessionToken"]
+          return call(path, options, session_retries + 1)
+        else
+          raise OpenApiError::CriticalApiError.new("Session expired and failed to be re-established after #{session_retries} tries")
+        end
       end
+
       response_hash = { code: response.code, body: response.body }
     rescue StandardError=>e
-      "An error has occurred connecting to the CDNetworks API (#{e})"
+      case e
+      when OpenApiError::CriticalApiError
+        raise e
+      when OpenApiError::ApiError
+        raise e
+      else
+        "An error has occurred connecting to the CDNetworks API (#{e})"
+      end
     end
   end
 
@@ -72,7 +85,7 @@ class CdnetworksClient
   def expired_session_response?(response)
     if response.code.to_s == "200"
       begin
-        parsed = JSON.parse(response.body)
+        parsed = JSON.parse(response.body.to_s)
         if parsed.values.first
           parsed.values.first['returnCode'] == 102
         else

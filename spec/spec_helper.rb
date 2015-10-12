@@ -15,7 +15,7 @@ module ApiStubs
   end
 
   def stub_login(return_token, svc_identifier)
-    resp = JSON.pretty_unparse({loginResponse: {resultCode: 0,
+    resp = JSON.pretty_unparse({loginResponse: {returnCode: 0,
                                                 session: [{sessionToken: return_token,
                                                            svcGroupName: "Service Group Name",
                                                            svcGroupIdentifier: svc_identifier}]}})

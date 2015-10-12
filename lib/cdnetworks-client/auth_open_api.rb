@@ -4,7 +4,7 @@ module AuthOpenApi
 
   class AuthSession
     def raise_handled_error(code, desc)
-      raise "Auth error: #{code} - #{desc}"
+      raise OpenApiError::ApiError.new("Auth error: #{code} - #{desc}")
     end
 
     def initialize(user, pass, base_url)
@@ -25,11 +25,12 @@ module AuthOpenApi
       }
       response = Net::HTTP.post_form(URI("#{@base_url}#{LOGIN_URL}"), params)
 
-      if error = OpenApiError::ERROR_CODES[response.code]
+      if error = OpenApiError::ERROR_CODES[response.code.to_s]
         raise_handled_error(response.code, error)
-      elsif %w{0 200}.include?(response.code)
+      elsif %w{0 200}.include?(response.code.to_s)
+
         data = JSON.parse(response.body)
-        code = data.fetch('loginResponse',{})['resultCode']
+        code = data.fetch('loginResponse',{})['returnCode']
 
         if error = OpenApiError::ERROR_CODES[code.to_s]
           raise_handled_error(code, error)
@@ -37,7 +38,7 @@ module AuthOpenApi
           data['loginResponse']['session']
         end
       else
-        raise "Unknown Auth response: #{response.code}\n#{response.body}"
+        raise OpenApiError::ApiError.new("Unknown Auth response: #{response.code}\n#{response.body}")
       end
     end
 
@@ -56,7 +57,7 @@ module AuthOpenApi
         raise_handled_error(response.code, error)
       elsif %w{0 200}.include?(response.code)
         data = JSON.parse(response.body)
-        code = data.fetch('loginResponse',{})['resultCode']
+        code = data.fetch('loginResponse',{})['returnCode']
 
         if error = OpenApiError::ERROR_CODES[code.to_s]
           raise_handled_error(code, error)
@@ -64,7 +65,7 @@ module AuthOpenApi
           data['loginResponse']['session']
         end
       else
-        raise "Unknown Auth response: #{response.code}\n#{response.body}"
+        raise OpenApiError::ApiError.new("Unknown Auth response: #{response.code}\n#{response.body}")
       end
     end
 
@@ -73,8 +74,8 @@ module AuthOpenApi
     end
   end
 
-  def get_session(reset = false)
-    if !@auth_session || reset
+  def get_session(reset_session = false)
+    if !@auth_session || reset_session
       @auth_session = AuthSession.new(@user, @password, base_url(@location))
     end
 
