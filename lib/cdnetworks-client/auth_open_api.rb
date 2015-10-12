@@ -23,7 +23,15 @@ module AuthOpenApi
         pass: @pass,
         output: "json"
       }
-      response = Net::HTTP.post_form(URI("#{@base_url}#{LOGIN_URL}"), params)
+      uri = URI("#{@base_url}#{LOGIN_URL}")
+
+      response = Net::HTTP.start(uri.host, uri.port,
+                      :use_ssl => uri.scheme == 'https') do |http|
+
+        request = Net::HTTP::Post.new uri.to_s
+
+        http.request request # Net::HTTPResponse object
+      end
 
       if error = OpenApiError::ERROR_CODES[response.code.to_s]
         raise_handled_error(response.code, error)
