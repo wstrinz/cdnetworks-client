@@ -9,7 +9,7 @@ module OpenApiKeys
     uri = URI("#{base_url(@location)}/#{GET_KEY_PATH}")
     uri.query = URI.encode_www_form(params)
 
-    response_handler = -> (response) do
+    response_handler = lambda do |response|
       if response[:code] == "200"
         body = response[:body]
         parsed = JSON.parse(body)
