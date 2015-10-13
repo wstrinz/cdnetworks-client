@@ -29,6 +29,7 @@ module AuthOpenApi
                       :use_ssl => uri.scheme == 'https') do |http|
 
         request = Net::HTTP::Post.new uri.to_s
+        request.set_form_data(params)
 
         http.request request # Net::HTTPResponse object
       end
