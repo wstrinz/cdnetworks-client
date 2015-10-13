@@ -87,7 +87,8 @@ class CdnetworksClient
       begin
         parsed = JSON.parse(response.body.to_s)
         if parsed.values.first
-          parsed.values.first['returnCode'] == 102
+          parsed.values.first['returnCode'] == 102 ||
+            parsed.values.first['resultCode'] == 102
         else
           false
         end
