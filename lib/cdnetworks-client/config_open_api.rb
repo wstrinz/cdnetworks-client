@@ -2,8 +2,11 @@ module ConfigOpenApi
   def list(options={})
     if location == "Beta"
       session_token = get_session_token
-      keys = get_api_key_list(session_token)
-      keys.map{|d| d['serviceName']}
+      # keys = get_api_key_list(session_token)
+
+      params = { sessionToken: session_token, apiKey: "SERVICECATEGORY_CA" }
+      pad_path = "/api/rest/pan/site/list"
+      call(pad_path, params)
     else
       call(config_open_path("list"),add_config_credentials(options))
     end

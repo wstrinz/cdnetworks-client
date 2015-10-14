@@ -27,9 +27,9 @@ describe CdnetworksClient do
     expect(usage).to eq(0)
   end
 
-  it 'lists domains for a session' do
-    domains = @client.list
+  it 'lists pads for a session' do
+    pads = @client.list
 
-    expect(domains.length).to be > 0
+    expect(pads.length).to be > 0
   end
 end
