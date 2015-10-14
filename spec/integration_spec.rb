@@ -28,7 +28,8 @@ describe CdnetworksClient do
   end
 
   it 'lists domains for a session' do
-    domains = @client.list_new
+    domains = @client.list
+
     expect(domains.length).to be > 0
   end
 end
