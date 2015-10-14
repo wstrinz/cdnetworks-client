@@ -349,9 +349,7 @@ describe CdnetworksClient do
     end
 
     it "returns an error" do
-      error_result = @cdn_api.list
-      expect(error_result).to include("An error has occurred")
-      expect(error_result).to include("execution expired")
+      expect { @cdn_api.list }.to raise_error(Timeout::Error)
     end
   end
 

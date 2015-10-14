@@ -32,30 +32,19 @@ class CdnetworksClient
   end
 
   def call(path,options,session_retries=0)
-    begin
-      response = http.request(compose_request(path,options))
+    response = http.request(compose_request(path,options))
 
-      if expired_session_response?(response)
-        if session_retries <= MAX_SESSION_RETRIES
-          new_session = get_session(true)
-          options[:sessionToken] = new_session.first["sessionToken"]
-          return call(path, options, session_retries + 1)
-        else
-          raise OpenApiError::CriticalApiError.new("Session expired and failed to be re-established after #{session_retries} tries")
-        end
-      end
-
-      response_hash = { code: response.code, body: response.body }
-    rescue StandardError=>e
-      case e
-      when OpenApiError::CriticalApiError
-        raise e
-      when OpenApiError::ApiError
-        raise e
+    if expired_session_response?(response)
+      if session_retries <= MAX_SESSION_RETRIES
+        new_session_token = get_session_token(true)
+        options[:sessionToken] = new_session_token
+        return call(path, options, session_retries + 1)
       else
-        "An error has occurred connecting to the CDNetworks API (#{e})"
+        raise OpenApiError::CriticalApiError.new("Session expired and failed to be re-established after #{session_retries} tries")
       end
     end
+
+    response_hash = { code: response.code, body: response.body }
   end
 
   private
