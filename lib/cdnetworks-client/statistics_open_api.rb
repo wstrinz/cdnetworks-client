@@ -31,12 +31,12 @@ module StatisticsOpenApi
   end
 
   def bandwidth_usage(service_name, from, to, time_interval = 2)
-    session = get_session
+    session_token = get_session_token
 
-    api_key = get_api_key(session.first["sessionToken"], service_name)
+    api_key = get_api_key(session_token, service_name)
 
     opts = {
-      sessionToken: session.first['sessionToken'],
+      sessionToken: session_token,
       apiKey: api_key,
       fromDate: from.strftime("%Y%m%d"),
       toDate: to.strftime("%Y%m%d"),

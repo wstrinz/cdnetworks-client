@@ -26,7 +26,7 @@ module AuthOpenApi
       uri = URI("#{@base_url}#{LOGIN_URL}")
 
       response = Net::HTTP.start(uri.host, uri.port,
-                      :use_ssl => uri.scheme == 'https') do |http|
+                                 :use_ssl => uri.scheme == 'https') do |http|
 
         request = Net::HTTP::Post.new uri.to_s
         request.set_form_data(params)
@@ -83,7 +83,7 @@ module AuthOpenApi
     end
   end
 
-  def get_session(reset_session = false)
+  def get_session_token(reset_session = false, keynum = 0)
     if !@auth_session || reset_session
       @auth_session = AuthSession.new(@user, @password, base_url(@location))
     end
