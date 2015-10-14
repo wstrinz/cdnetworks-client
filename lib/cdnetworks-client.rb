@@ -1,5 +1,7 @@
 require "json"
 
+require_relative "patches"
+
 require "cdnetworks-client/version"
 require "cdnetworks-client/cache_purge_api"
 require "cdnetworks-client/config_open_api"

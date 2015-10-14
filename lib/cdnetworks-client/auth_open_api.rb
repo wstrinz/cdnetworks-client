@@ -88,6 +88,12 @@ module AuthOpenApi
       @auth_session = AuthSession.new(@user, @password, base_url(@location))
     end
 
-    @auth_session.session
+    session = Array.wrap(@auth_session.session)[keynum]
+
+    if session.is_a?(Hash)
+      session['sessionToken']
+    else
+      nil
+    end
   end
 end
