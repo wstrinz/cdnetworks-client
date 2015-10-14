@@ -1,12 +1,12 @@
 module ConfigOpenApi
-  def list_new(options={})
-    session_token = get_session_token
-    keys = get_api_key_list(session_token)
-    keys.map{|d| d['serviceName']}
-  end
-
   def list(options={})
-    call(config_open_path("list"),add_config_credentials(options))
+    if location == "Beta"
+      session_token = get_session_token
+      keys = get_api_key_list(session_token)
+      keys.map{|d| d['serviceName']}
+    else
+      call(config_open_path("list"),add_config_credentials(options))
+    end
   end
 
   def view(options={})

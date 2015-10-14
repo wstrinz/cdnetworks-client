@@ -363,6 +363,8 @@ describe CdnetworksClient do
                            )
 
       @url               = "https://openapi-beta.cdnetworks.com"
+
+      @fake_token, @fake_key, _, @fake_service = stub_auth_calls
     end
 
     context "Session Management" do
@@ -395,9 +397,16 @@ describe CdnetworksClient do
       end
     end
 
-    describe AuthOpenApi do
-      before { @fake_token, _, @fake_identifier = stub_auth_calls }
+    describe ConfigOpenApi do
+      it "fetches list using api key endpoint for OpenApiV2" do
+        expect(@cdn_api.list).to include(@fake_service)
 
+        expect(a_request(:post, "#{@url}/api/rest/getApiKeyList")).
+                 to have_been_made
+      end
+    end
+
+    describe AuthOpenApi do
       it "gets a session token" do
         session_token = @cdn_api.get_session_token
 
@@ -412,7 +421,6 @@ describe CdnetworksClient do
     end
 
     describe OpenApiKeys do
-      before { @fake_token, @fake_key, _, @fake_service = stub_auth_calls }
 
       it "gets api keys" do
         api_key = @cdn_api.get_api_key(@fake_token, @fake_service)
@@ -428,7 +436,6 @@ describe CdnetworksClient do
         let(:expected_bandwidth) { 1.23456 }
 
         before do
-          _, _, _, @fake_service = stub_auth_calls
           stub_get_edge_traffic(expected_bandwidth)
         end
 

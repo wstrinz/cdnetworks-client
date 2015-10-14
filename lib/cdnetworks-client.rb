@@ -47,6 +47,10 @@ class CdnetworksClient
     response_hash = { code: response.code, body: response.body }
   end
 
+  def location
+    @location
+  end
+
   private
 
   def base_url(location=nil)
