@@ -9,7 +9,7 @@ module StatisticsOpenApi
       raise "Error #{resp[:code]}: #{desc}"
     end
 
-    def self.handle_response(resp)
+    def self.handle_bandwidth_response(resp)
       if resp[:code] == "200"
         parsed = JSON.parse(resp[:body])
         return_code = parsed['trafficResponse']['returnCode'].to_s
@@ -46,6 +46,6 @@ module StatisticsOpenApi
 
     response = call(BANDWIDTH_PATH, opts)
 
-    StatsHelper.handle_response(response)
+    StatsHelper.handle_bandwidth_response(response)
   end
 end

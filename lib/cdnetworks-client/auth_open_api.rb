@@ -23,32 +23,7 @@ module AuthOpenApi
         pass: @pass,
         output: "json"
       }
-      uri = URI("#{@base_url}#{LOGIN_URL}")
-
-      response = Net::HTTP.start(uri.host, uri.port,
-                                 :use_ssl => uri.scheme == 'https') do |http|
-
-        request = Net::HTTP::Post.new uri.to_s
-        request.set_form_data(params)
-
-        http.request request # Net::HTTPResponse object
-      end
-
-      if error = OpenApiError::ERROR_CODES[response.code.to_s]
-        raise_handled_error(response.code, error)
-      elsif %w{0 200}.include?(response.code.to_s)
-
-        data = JSON.parse(response.body)
-        code = data.fetch('loginResponse',{})['returnCode']
-
-        if error = OpenApiError::ERROR_CODES[code.to_s]
-          raise_handled_error(code, error)
-        else
-          data['loginResponse']['session']
-        end
-      else
-        raise OpenApiError::ApiError.new("Unknown Auth response: #{response.code}\n#{response.body}")
-      end
+      handle_auth_response 'login', post_data("#{@base_url}#{LOGIN_URL}", params)
     end
 
     def logout
@@ -57,21 +32,35 @@ module AuthOpenApi
         pass: @pass,
         output: "json"
       }
-      request = Net::HTTP::Post.new("#{@base_url}#{LOGIN_URL}")
-      request.set_form_data(params)
+      response = post_data("#{@base_url}#{LOGOUT_URL}", params)
 
-      response = http.request(request)
+      handle_auth_response('logout', response)
+    end
 
-      if error = OpenApiError::ERROR_CODES[response.code]
+    def post_data(path, params)
+      uri = URI(path)
+      Net::HTTP.start(uri.host, uri.port,
+                                 :use_ssl => uri.scheme == 'https') do |http|
+
+        request = Net::HTTP::Post.new uri.to_s
+        request.set_form_data(params)
+
+        http.request request # Net::HTTPResponse object
+      end
+    end
+
+    def handle_auth_response(type, response)
+      if error = OpenApiError::ERROR_CODES[response.code.to_s]
         raise_handled_error(response.code, error)
-      elsif %w{0 200}.include?(response.code)
+      elsif %w{0 200}.include?(response.code.to_s)
+
         data = JSON.parse(response.body)
-        code = data.fetch('loginResponse',{})['returnCode']
+        code = data.fetch("#{type}Response",{})['returnCode']
 
         if error = OpenApiError::ERROR_CODES[code.to_s]
           raise_handled_error(code, error)
         else
-          data['loginResponse']['session']
+          data["#{type}Response"]['session']
         end
       else
         raise OpenApiError::ApiError.new("Unknown Auth response: #{response.code}\n#{response.body}")
