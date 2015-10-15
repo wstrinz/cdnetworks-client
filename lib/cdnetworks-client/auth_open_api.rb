@@ -53,9 +53,8 @@ module AuthOpenApi
       if error = OpenApiError::ERROR_CODES[response.code.to_s]
         raise_handled_error(response.code, error)
       elsif %w{0 200}.include?(response.code.to_s)
-
         data = JSON.parse(response.body)
-        code = data.fetch("#{type}Response",{})['resultCode']
+        code = data.fetch("#{type}Response",{})['resultCode'] || data.fetch("#{type}Response",{})['returnCode']
 
         if error = OpenApiError::ERROR_CODES[code.to_s]
           raise_handled_error(code, error)
