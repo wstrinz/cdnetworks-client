@@ -384,7 +384,7 @@ describe CdnetworksClient do
       end
 
       it "doesn't infinite loop if session can't be re-established" do
-        stub_request(:post, "#{@url}/api/rest/login").to_return(body: JSON.pretty_unparse(loginResponse: {returnCode: 101}))
+        stub_request(:post, "#{@url}/api/rest/login").to_return(body: JSON.pretty_unparse(loginResponse: {resultCode: 101}))
         expect { @cdn_api.get_api_key_list(bad_token) }.to raise_error(OpenApiError::ApiError)
       end
 
