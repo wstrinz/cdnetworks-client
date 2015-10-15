@@ -78,8 +78,8 @@ class CdnetworksClient
 
       result_code = data.values.first['resultCode'] || data.values.first['returnCode']
 
-      if !%w{0 200}.include?(result_code.to_s)
-        OpenApiError::ErrorHandler.handle_error_response(result_code, body)
+      if !%w{0 200 404}.include?(result_code.to_s)
+        OpenApiError::ErrorHandler.handle_error_response(result_code, response.body)
       else
         {code: result_code, body: data}
       end

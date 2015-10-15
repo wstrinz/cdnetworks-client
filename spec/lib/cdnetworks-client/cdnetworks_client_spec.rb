@@ -425,7 +425,6 @@ describe CdnetworksClient do
     end
 
     describe OpenApiKeys do
-
       it "gets api keys" do
         api_key = @cdn_api.get_api_key(@fake_token, @fake_service)
 

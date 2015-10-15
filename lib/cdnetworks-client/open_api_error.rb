@@ -8,7 +8,6 @@ module OpenApiError
     "203" => "Inaccessible service (Setting can be modified via Customer Portal)",
     "204" => "Inaccessible Request (See Table-1. The Scope of CDNetworks Statistics Open API)",
     "301" => "Unregistered API key (Registration information is provided in Customer Portal)",
-    "404" => "There is no data.",
     "999" => "Temporary error"
   }
 
