@@ -11,10 +11,10 @@ module ConfigOpenApi
         data = JSON.parse(response[:body])
         result_code = data.fetch("PadConfigResponse",{})["resultCode"]
 
-        if OpenApiError::ERROR_CODES.keys.include?(result_code.to_s)
-          OpenApiError::handle_error_response(response[:code], response[:body])
-        else
+        if %w{0 200}.include? result_code.to_s
           data["PadConfigResponse"]["data"]["data"]
+        else
+          OpenApiError::ErrorHandler.handle_error_response(result_code, body)
         end
       end
     else
