@@ -399,12 +399,16 @@ describe CdnetworksClient do
 
     describe ConfigOpenApi do
       before { stub_pad_list(@fake_service) }
+
       it "fetches list using api key endpoint for OpenApiV2" do
         expect(@cdn_api.list.first["origin"]).to eq(@fake_service)
       end
     end
 
     describe AuthOpenApi do
+      it "raises error on failed login" do
+      end
+
       it "gets a session token" do
         session_token = @cdn_api.get_session_token
 

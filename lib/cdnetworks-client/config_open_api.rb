@@ -1,24 +1,10 @@
 module ConfigOpenApi
   def list(options={})
+    response = call(config_open_path("list"), add_config_credentials(options))
     if location == "Beta"
-      session_token = get_session_token
-      keys = get_api_key_list(session_token)
-      api_key = keys.find{|k| k["type"] == 0}["apiKey"]
-      params = { sessionToken: session_token, apiKey: api_key }
-      pad_path = "/api/rest/pan/site/list"
-      response = call(pad_path, params.merge(options))
-      if response[:code].to_s == "200"
-        data = JSON.parse(response[:body])
-        result_code = data.fetch("PadConfigResponse",{})["resultCode"]
-
-        if %w{0 200}.include? result_code.to_s
-          data["PadConfigResponse"]["data"]["data"]
-        else
-          OpenApiError::ErrorHandler.handle_error_response(result_code, body)
-        end
-      end
+      response[:body]["PadConfigResponse"]["data"]["data"]
     else
-      call(config_open_path("list"),add_config_credentials(options))
+      response
     end
   end
 
@@ -35,12 +21,25 @@ module ConfigOpenApi
   end
 
   def config_open_path(command)
-    "/config/rest/pan/site/#{command}"
+    if location == "Beta"
+      "/api/rest/pan/site/#{command}"
+    else
+      "/config/rest/pan/site/#{command}"
+    end
   end
 
   def add_config_credentials(options)
-    options[:user]     = @user
-    options[:pass] = @password
+    if location == "Beta"
+      session_token = get_session_token
+      keys = get_api_key_list(session_token)
+      api_key = keys.find{|k| k["type"] == 0}["apiKey"]
+
+      options[:sessionToken] = session_token
+      options[:apiKey] = api_key
+    else
+      options[:user]     = @user
+      options[:pass] = @password
+    end
 
     options
   end

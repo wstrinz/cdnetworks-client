@@ -34,17 +34,11 @@ class CdnetworksClient
   def call(path,options,session_retries=0)
     response = http.request(compose_request(path,options))
 
-    if expired_session_response?(response)
-      if session_retries <= MAX_SESSION_RETRIES
-        new_session_token = get_session_token(true)
-        options[:sessionToken] = new_session_token
-        return call(path, options, session_retries + 1)
-      else
-        raise OpenApiError::CriticalApiError.new("Session expired and failed to be re-established after #{session_retries} tries")
-      end
+    if @location == "Beta"
+      process_beta_response(path, options, response, session_retries)
+    else
+      response_hash = { code: response.code, body: response.body }
     end
-
-    response_hash = { code: response.code, body: response.body }
   end
 
   def location
@@ -65,6 +59,32 @@ class CdnetworksClient
       "https://openapi-beta.cdnetworks.com"
     else
       "https://openapi.us.cdnetworks.com"
+    end
+  end
+
+  def process_beta_response(path, options, response, session_retries)
+    if expired_session_response?(response)
+      if session_retries <= MAX_SESSION_RETRIES
+        new_session_token = get_session_token(true)
+        options[:sessionToken] = new_session_token
+        return call(path, options, session_retries + 1)
+      else
+        raise OpenApiError::CriticalApiError.new("Session expired and failed to be re-established after #{session_retries} tries")
+      end
+    end
+
+    begin
+      data = JSON.parse(response.body)
+
+      result_code = data.values.first['resultCode'] || data.values.first['returnCode']
+
+      if !%w{0 200}.include?(result_code.to_s)
+        OpenApiError::ErrorHandler.handle_error_response(result_code, body)
+      else
+        {code: result_code, body: data}
+      end
+    rescue JSON::ParserError
+      raise OpenApiError::CriticalApiError.new("Unparseable body: #{response.body}")
     end
   end
 
