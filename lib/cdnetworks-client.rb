@@ -16,17 +16,18 @@ class CdnetworksClient
   include CachePurgeApi
   include CacheFlushOpenApi
   include StatisticsOpenApi
+  attr_accessor :user, :password, :location
 
   MAX_SESSION_RETRIES = 2
 
   def initialize(credentials={})
-    @user       = credentials[:user]
-    @password   = credentials[:pass]
-    @location   = credentials[:location]
+    self.user       = credentials[:user]
+    self.password   = credentials[:pass]
+    self.location   = credentials[:location]
   end
 
   def compose_request(path,options)
-    request = Net::HTTP::Post.new("#{base_url(@location)}#{path}")
+    request = Net::HTTP::Post.new("#{base_url(location)}#{path}")
     request.set_form_data(options)
     request
   end
@@ -34,28 +35,24 @@ class CdnetworksClient
   def call(path,options,session_retries=0)
     response = http.request(compose_request(path,options))
 
-    if @location == "Beta"
+    if location == "Beta"
       process_beta_response(path, options, response, session_retries)
     else
       response_hash = { code: response.code, body: response.body }
     end
   end
 
-  def location
-    @location
-  end
-
   private
 
-  def base_url(location=nil)
+  def base_url(loc=nil)
     case
-    when location == "Korea"
+    when loc == "Korea"
       "https://openapi.kr.cdnetworks.com"
-    when location == "Japan"
+    when loc == "Japan"
       "https://openapi.jp.cdnetworks.com"
-    when location == "China"
+    when loc == "China"
       "https://openapi.txnetworks.cn"
-    when location == "Beta"
+    when loc == "Beta"
       "https://openapi-beta.cdnetworks.com"
     else
       "https://openapi.us.cdnetworks.com"
@@ -89,7 +86,7 @@ class CdnetworksClient
   end
 
   def http
-    uri = URI.parse(base_url(@location))
+    uri = URI.parse(base_url(location))
 
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
