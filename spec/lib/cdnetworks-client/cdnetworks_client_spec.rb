@@ -407,6 +407,8 @@ describe CdnetworksClient do
 
     describe AuthOpenApi do
       it "raises error on failed login" do
+        stub_failed_login
+        expect{ @cdn_api.get_session_token }.to raise_error(OpenApiError::ApiError)
       end
 
       it "gets a session token" do

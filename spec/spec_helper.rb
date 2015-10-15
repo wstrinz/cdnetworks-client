@@ -23,6 +23,10 @@ module ApiStubs
     stub_request(:post, "#{@url}/api/rest/login").to_return(body: resp)
   end
 
+  def stub_failed_login
+    stub_request(:post, "#{@url}/api/rest/login").to_return(body: JSON.pretty_unparse(loginResponse: {returnCode: 101}))
+  end
+
   def stub_get_api_keys(session_token, service_name, return_key)
     resp = JSON.pretty_unparse({apiKeyInfo: {returnCode: 0,
                                              apiKeyInfoItem: [{type: 0,
