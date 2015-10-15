@@ -398,11 +398,9 @@ describe CdnetworksClient do
     end
 
     describe ConfigOpenApi do
+      before { stub_pad_list(@fake_service) }
       it "fetches list using api key endpoint for OpenApiV2" do
-        expect(@cdn_api.list).to include(@fake_service)
-
-        expect(a_request(:post, "#{@url}/api/rest/getApiKeyList")).
-                 to have_been_made
+        expect(@cdn_api.list.first["origin"]).to eq(@fake_service)
       end
     end
 

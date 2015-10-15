@@ -48,6 +48,19 @@ module ApiStubs
                                                  [{dateTime: '200809162305', bandwidth: 10, dataTransferred: expected_bandwidth}]})
     stub_request(:post, "#{@url}/api/rest/traffic/edge").to_return(body: resp)
   end
+
+  def stub_pad_list(expected_service)
+     resp = { "PadConfigResponse" => {
+                "resultCode" => 200,
+                "data"=> {
+                  "errors" => "",
+                  "data" => [ {"origin"=>expected_service, "pad"=>"pad.#{expected_service}", "id"=>11111},
+                              {"origin"=>"another-site.com", "pad"=>"assets.another-site.com", "id"=>22222},
+                              {"origin"=>"some.site.with.many.subdomains.com", "pad"=>"assets.many.subdomains.com", "id"=>33333},
+                              {"origin"=>"somesite.s3.amazonaws.com", "pad"=>"assets.somesite.com", "id"=>44444} ]}}}
+
+    stub_request(:post, "#{@url}/api/rest/pan/site/list").to_return(body: JSON.pretty_unparse(resp))
+  end
 end
 
 RSpec.configure do |config|
