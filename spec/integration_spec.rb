@@ -22,9 +22,11 @@ describe CdnetworksClient do
     expect(@client.get_session_token).not_to be_nil
   end
 
-  skip 'gets bandwidth usage' do
-    usage = @client.bandwidth_usage("service_name", Date.today - 2, Date.today - 1)
-    expect(usage).to eq(0)
+  it 'gets bandwidth usage' do
+    pad = ENV['CDN_PAD']
+    skip "must set CDN_PAD env var" unless pad
+    usage = @client.bandwidth_usage(pad, Date.today - 2, Date.today - 1)
+    expect(usage).to be > 0
   end
 
   it 'lists pads for a session' do
