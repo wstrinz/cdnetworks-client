@@ -4,6 +4,7 @@ The Cdnetworks Client is a simple wrapper for three [Cdnetworks](http://www.cdne
 * Config Open API v1.0
 * Cache Purge Open API v2.0 (older cache flushing API)
 * Cache Flush Open API v2.3.2 (most current cache flushing API)
+* Statistics Open API v2
 
 This gem allows a user to call methods from either of these APIs using the same syntax.
 
